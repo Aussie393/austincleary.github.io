@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Engine Maintenance Dashboard | Austin Cleary</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/dashboard.css">
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <!-- Header & Navigation -->
+  <header>
+    <div class="container">
+      <h1 class="logo">Austin Cleary</h1>
+      <nav>
+        <ul class="nav-links">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="projects.html">Projects</a></li>
+          <li><a href="resume.html">Resume</a></li>
+          <li><a href="dashboard.html" class="active">Dashboard</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main>
+    <section class="page-header">
+      <div class="container">
+        <h1>Engine Maintenance Optimization Dashboard</h1>
+        <p>Interactive dashboard for optimizing engine maintenance parameters and visualizing maintenance plans.</p>
+      </div>
+    </section>
+
+    <section class="dashboard-content">
+      <div class="container">
+        <div id="dashboard-root"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <p>© 2025 Austin Cleary | 
+      <a href="https://github.com/aussie393" target="_blank">GitHub</a> | 
+      <a href="mailto:austincleary393@gmail.com">Email</a>
+    </p>
+  </footer>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    // Parameter Control Component
+    const ParameterControl = ({ label, value, min, max, step, onChange, unit }) => (
+      <div className="parameter-control">
+        <label>{label}</label>
+        <div className="control-group">
+          <input
+            type="range"
+            min={min}
+            max={max}
+            step={step}
+            value={value}
+            onChange={(e) => onChange(parseFloat(e.target.value))}
+            className="slider"
+          />
+          <span className="value-display">{value}{unit}</span>
+        </div>
+      </div>
+    );
+
+    // Maintenance Plan Card Component
+    const MaintenancePlanCard = ({ plan, isRecommended, onClick }) => (
+      <div className={`maintenance-plan-card ${isRecommended ? 'recommended' : ''}`}>
+        <div className="plan-header">
+          <h3>{plan.name}</h3>
+          {isRecommended && <span className="recommended-badge">Recommended</span>}
+        </div>
+        <div className="plan-details">
+          <div className="plan-metric">
+            <span className="metric-label">Frequency:</span>
+            <span className="metric-value">{plan.frequency}</span>
+          </div>
+          <div className="plan-metric">
+            <span className="metric-label">Cost:</span>
+            <span className="metric-value">${plan.cost.toLocaleString()}</span>
+          </div>
+          <div className="plan-metric">
+            <span className="metric-label">Efficiency:</span>
+            <span className="metric-value">{plan.efficiency}%</span>
+          </div>
+          <div className="plan-metric">
+            <span className="metric-label">Risk Level:</span>
+            <span className={`risk-level ${plan.riskLevel.toLowerCase()}`}>{plan.riskLevel}</span>
+          </div>
+        </div>
+        <div className="plan-description">
+          <p>{plan.description}</p>
+        </div>
+        <button className="btn" onClick={() => onClick(plan)}>
+          Select Plan
+        </button>
+      </div>
+    );
+
+    // Chart Component
+    const OptimizationChart = ({ data }) => {
+      const canvasRef = React.useRef(null);
+      const chartRef = React.useRef(null);
+
+      useEffect(() => {
+        if (canvasRef.current) {
+          const ctx = canvasRef.current.getContext('2d');
+          
+          if (chartRef.current) {
+            chartRef.current.destroy();
+          }
+
+          chartRef.current = new Chart(ctx, {
+            type: 'line',
+            data: {
+              labels: data.labels,
+              datasets: [
+                {
+                  label: 'Maintenance Cost',
+                  data: data.cost,
+                  borderColor: '#1E3A8A',
+                  backgroundColor: 'rgba(30, 58, 138, 0.1)',
+                  tension: 0.4,
+                  yAxisID: 'y'
+                },
+                {
+                  label: 'Engine Efficiency (%)',
+                  data: data.efficiency,
+                  borderColor: '#F59E0B',
+                  backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                  tension: 0.4,
+                  yAxisID: 'y1'
+                }
+              ]
+            },
+            options: {
+              responsive: true,
+              interaction: {
+                mode: 'index',
+                intersect: false,
+              },
+              scales: {
+                x: {
+                  display: true,
+                  title: {
+                    display: true,
+                    text: 'Time (Months)'
+                  }
+                },
+                y: {
+                  type: 'linear',
+                  display: true,
+                  position: 'left',
+                  title: {
+                    display: true,
+                    text: 'Cost ($)'
+                  }
+                },
+                y1: {
+                  type: 'linear',
+                  display: true,
+                  position: 'right',
+                  title: {
+                    display: true,
+                    text: 'Efficiency (%)'
+                  },
+                  grid: {
+                    drawOnChartArea: false,
+                  },
+                }
+              }
+            }
+          });
+        }
+
+        return () => {
+          if (chartRef.current) {
+            chartRef.current.destroy();
+          }
+        };
+      }, [data]);
+
+      return <canvas ref={canvasRef} width="400" height="200"></canvas>;
+    };
+
+    // Main Dashboard Component
+    const Dashboard = () => {
+      const [parameters, setParameters] = useState({
+        operatingHours: 2500,
+        ambientTemperature: 25,
+        loadFactor: 75,
+        maintenanceBudget: 50000,
+        riskTolerance: 50
+      });
+
+      const [selectedPlan, setSelectedPlan] = useState(null);
+      const [chartData, setChartData] = useState(null);
+
+      // Generate maintenance plans based on parameters
+      const generateMaintenancePlans = () => {
+        const { operatingHours, ambientTemperature, loadFactor, maintenanceBudget, riskTolerance } = parameters;
+        
+        const baseCost = operatingHours * 0.5;
+        const tempFactor = ambientTemperature > 30 ? 1.2 : 1.0;
+        const loadFactorMultiplier = loadFactor / 100;
+        
+        return [
+          {
+            id: 1,
+            name: 'Preventive Maintenance',
+            frequency: 'Every 500 hours',
+            cost: Math.round(baseCost * 0.8 * tempFactor * loadFactorMultiplier),
+            efficiency: Math.min(95, 85 + (riskTolerance / 10)),
+            riskLevel: 'Low',
+            description: 'Regular scheduled maintenance to prevent failures and maintain optimal performance.'
+          },
+          {
+            id: 2,
+            name: 'Predictive Maintenance',
+            frequency: 'Based on condition',
+            cost: Math.round(baseCost * 1.2 * tempFactor * loadFactorMultiplier),
+            efficiency: Math.min(98, 90 + (riskTolerance / 15)),
+            riskLevel: 'Medium',
+            description: 'Data-driven maintenance using sensors and analytics to predict when maintenance is needed.'
+          },
+          {
+            id: 3,
+            name: 'Reactive Maintenance',
+            frequency: 'When failure occurs',
+            cost: Math.round(baseCost * 0.6 * tempFactor * loadFactorMultiplier),
+            efficiency: Math.max(60, 70 - (riskTolerance / 20)),
+            riskLevel: 'High',
+            description: 'Maintenance performed only after equipment failure, lowest upfront cost but higher risk.'
+          },
+          {
+            id: 4,
+            name: 'Condition-Based Maintenance',
+            frequency: 'Real-time monitoring',
+            cost: Math.round(baseCost * 1.5 * tempFactor * loadFactorMultiplier),
+            efficiency: Math.min(99, 92 + (riskTolerance / 12)),
+            riskLevel: 'Low',
+            description: 'Advanced monitoring with continuous assessment of equipment condition and performance.'
+          }
+        ];
+      };
+
+      // Generate chart data
+      const generateChartData = () => {
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const { operatingHours, maintenanceBudget } = parameters;
+        
+        const baseCost = operatingHours * 0.5;
+        const costData = months.map((_, index) => 
+          Math.round(baseCost * (0.8 + 0.4 * Math.sin(index * 0.5)) * (1 + Math.random() * 0.2))
+        );
+        
+        const efficiencyData = months.map((_, index) => 
+          Math.round(85 + 10 * Math.sin(index * 0.3) + Math.random() * 5)
+        );
+
+        return {
+          labels: months,
+          cost: costData,
+          efficiency: efficiencyData
+        };
+      };
+
+      // Update parameters
+      const updateParameter = (paramName, value) => {
+        setParameters(prev => ({
+          ...prev,
+          [paramName]: value
+        }));
+      };
+
+      // Handle plan selection
+      const handlePlanSelection = (plan) => {
+        setSelectedPlan(plan);
+      };
+
+      // Update chart data when parameters change
+      useEffect(() => {
+        setChartData(generateChartData());
+      }, [parameters]);
+
+      const maintenancePlans = generateMaintenancePlans();
+      const recommendedPlan = maintenancePlans.reduce((best, plan) => 
+        plan.efficiency > best.efficiency ? plan : best
+      );
+
+      return (
+        <div className="dashboard-container">
+          <div className="dashboard-grid">
+            {/* Parameter Controls */}
+            <div className="parameters-panel">
+              <h2>Optimization Parameters</h2>
+              <div className="parameters-grid">
+                <ParameterControl
+                  label="Operating Hours (per month)"
+                  value={parameters.operatingHours}
+                  min={1000}
+                  max={5000}
+                  step={100}
+                  unit=" hrs"
+                  onChange={(value) => updateParameter('operatingHours', value)}
+                />
+                <ParameterControl
+                  label="Ambient Temperature"
+                  value={parameters.ambientTemperature}
+                  min={0}
+                  max={50}
+                  step={1}
+                  unit="°C"
+                  onChange={(value) => updateParameter('ambientTemperature', value)}
+                />
+                <ParameterControl
+                  label="Load Factor"
+                  value={parameters.loadFactor}
+                  min={25}
+                  max={100}
+                  step={5}
+                  unit="%"
+                  onChange={(value) => updateParameter('loadFactor', value)}
+                />
+                <ParameterControl
+                  label="Maintenance Budget"
+                  value={parameters.maintenanceBudget}
+                  min={10000}
+                  max={100000}
+                  step={5000}
+                  unit=""
+                  onChange={(value) => updateParameter('maintenanceBudget', value)}
+                />
+                <ParameterControl
+                  label="Risk Tolerance"
+                  value={parameters.riskTolerance}
+                  min={0}
+                  max={100}
+                  step={5}
+                  unit="%"
+                  onChange={(value) => updateParameter('riskTolerance', value)}
+                />
+              </div>
+            </div>
+
+            {/* Chart Panel */}
+            <div className="chart-panel">
+              <h2>Performance Analytics</h2>
+              <div className="chart-container">
+                {chartData && <OptimizationChart data={chartData} />}
+              </div>
+            </div>
+          </div>
+
+          {/* Maintenance Plans */}
+          <div className="plans-section">
+            <h2>Recommended Maintenance Plans</h2>
+            <div className="plans-grid">
+              {maintenancePlans.map(plan => (
+                <MaintenancePlanCard
+                  key={plan.id}
+                  plan={plan}
+                  isRecommended={plan.id === recommendedPlan.id}
+                  onClick={handlePlanSelection}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Selected Plan Details */}
+          {selectedPlan && (
+            <div className="selected-plan-section">
+              <h2>Selected Plan Details</h2>
+              <div className="selected-plan-card">
+                <h3>{selectedPlan.name}</h3>
+                <p>{selectedPlan.description}</p>
+                <div className="plan-metrics">
+                  <div className="metric">
+                    <span className="metric-label">Estimated Annual Cost:</span>
+                    <span className="metric-value">${selectedPlan.cost.toLocaleString()}</span>
+                  </div>
+                  <div className="metric">
+                    <span className="metric-label">Expected Efficiency:</span>
+                    <span className="metric-value">{selectedPlan.efficiency}%</span>
+                  </div>
+                  <div className="metric">
+                    <span className="metric-label">Maintenance Frequency:</span>
+                    <span className="metric-value">{selectedPlan.frequency}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    // Render the dashboard
+    ReactDOM.render(<Dashboard />, document.getElementById('dashboard-root'));
+  </script>
+</body>
+</html>

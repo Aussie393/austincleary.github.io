@@ -1,0 +1,348 @@
+/* Dashboard Specific Styles */
+
+.dashboard-content {
+  padding: 3rem 0;
+  min-height: 80vh;
+}
+
+.dashboard-container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  margin-bottom: 3rem;
+}
+
+/* Parameters Panel */
+.parameters-panel {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  border: 2px solid #F59E0B;
+}
+
+.parameters-panel h2 {
+  color: #1E3A8A;
+  margin-bottom: 2rem;
+  font-size: 1.8rem;
+  border-bottom: 3px solid #F59E0B;
+  padding-bottom: 0.5rem;
+}
+
+.parameters-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.parameter-control {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.parameter-control label {
+  color: #1E3A8A;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.control-group {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.slider {
+  flex: 1;
+  height: 8px;
+  border-radius: 5px;
+  background: #e0e0e0;
+  outline: none;
+  -webkit-appearance: none;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #1E3A8A;
+  cursor: pointer;
+  border: 2px solid #F59E0B;
+}
+
+.slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #1E3A8A;
+  cursor: pointer;
+  border: 2px solid #F59E0B;
+}
+
+.value-display {
+  background: #FEF3C7;
+  color: #1E3A8A;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-weight: 600;
+  min-width: 80px;
+  text-align: center;
+  border: 1px solid #F59E0B;
+}
+
+/* Chart Panel */
+.chart-panel {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  border: 2px solid #F59E0B;
+}
+
+.chart-panel h2 {
+  color: #1E3A8A;
+  margin-bottom: 2rem;
+  font-size: 1.8rem;
+  border-bottom: 3px solid #F59E0B;
+  padding-bottom: 0.5rem;
+}
+
+.chart-container {
+  height: 400px;
+  position: relative;
+}
+
+/* Plans Section */
+.plans-section {
+  margin-bottom: 3rem;
+}
+
+.plans-section h2 {
+  color: #1E3A8A;
+  text-align: center;
+  font-size: 2rem;
+  margin-bottom: 2rem;
+  border-bottom: 3px solid #F59E0B;
+  padding-bottom: 0.5rem;
+}
+
+.plans-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+}
+
+/* Maintenance Plan Cards */
+.maintenance-plan-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  border: 2px solid #e0e0e0;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.maintenance-plan-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+  border-color: #1E3A8A;
+}
+
+.maintenance-plan-card.recommended {
+  border-color: #F59E0B;
+  background: linear-gradient(135deg, #FEF3C7 0%, #ffffff 100%);
+}
+
+.plan-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.plan-header h3 {
+  color: #1E3A8A;
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+.recommended-badge {
+  background: #F59E0B;
+  color: white;
+  padding: 0.3rem 0.8rem;
+  border-radius: 15px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.plan-details {
+  margin-bottom: 1.5rem;
+}
+
+.plan-metric {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.plan-metric:last-child {
+  border-bottom: none;
+}
+
+.metric-label {
+  color: #666;
+  font-weight: 500;
+}
+
+.metric-value {
+  color: #1E3A8A;
+  font-weight: 600;
+}
+
+.risk-level {
+  padding: 0.2rem 0.6rem;
+  border-radius: 10px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.risk-level.low {
+  background: #D1FAE5;
+  color: #065F46;
+}
+
+.risk-level.medium {
+  background: #FEF3C7;
+  color: #92400E;
+}
+
+.risk-level.high {
+  background: #FEE2E2;
+  color: #991B1B;
+}
+
+.plan-description {
+  margin-bottom: 1.5rem;
+}
+
+.plan-description p {
+  color: #666;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Selected Plan Section */
+.selected-plan-section {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  border: 2px solid #F59E0B;
+}
+
+.selected-plan-section h2 {
+  color: #1E3A8A;
+  margin-bottom: 2rem;
+  font-size: 1.8rem;
+  border-bottom: 3px solid #F59E0B;
+  padding-bottom: 0.5rem;
+}
+
+.selected-plan-card {
+  background: #FEF3C7;
+  padding: 2rem;
+  border-radius: 8px;
+  border: 2px solid #F59E0B;
+}
+
+.selected-plan-card h3 {
+  color: #1E3A8A;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+}
+
+.selected-plan-card p {
+  color: #666;
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+
+.plan-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.metric {
+  background: white;
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid #F59E0B;
+}
+
+.metric .metric-label {
+  display: block;
+  color: #666;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+.metric .metric-value {
+  color: #1E3A8A;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  
+  .plans-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .plan-metrics {
+    grid-template-columns: 1fr;
+  }
+  
+  .control-group {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+  
+  .value-display {
+    text-align: center;
+  }
+  
+  .chart-container {
+    height: 300px;
+  }
+}
+
+@media (max-width: 480px) {
+  .parameters-panel,
+  .chart-panel,
+  .maintenance-plan-card,
+  .selected-plan-section {
+    padding: 1.5rem;
+  }
+  
+  .plans-section h2 {
+    font-size: 1.5rem;
+  }
+}
