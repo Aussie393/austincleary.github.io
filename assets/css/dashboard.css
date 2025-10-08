@@ -81,6 +81,74 @@
   font-weight: 600;
 }
 
+/* Engine Specifications */
+.engine-specs {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-top: 2rem;
+  border: 2px solid rgba(245, 158, 11, 0.3);
+}
+
+.engine-specs h3 {
+  color: white;
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+}
+
+.engine-specs p {
+  color: white;
+  margin-bottom: 0.5rem;
+  opacity: 0.9;
+}
+
+/* Chart Explanation */
+.chart-explanation {
+  margin-top: 3rem;
+}
+
+.chart-explanation h2 {
+  color: #1E3A8A;
+  text-align: center;
+  font-size: 2rem;
+  margin-bottom: 2rem;
+  border-bottom: 3px solid #F59E0B;
+  padding-bottom: 0.5rem;
+}
+
+.explanation-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  border: 2px solid #F59E0B;
+}
+
+.explanation-card h3 {
+  color: #1E3A8A;
+  margin-bottom: 1rem;
+  font-size: 1.3rem;
+  border-bottom: 2px solid #F59E0B;
+  padding-bottom: 0.3rem;
+}
+
+.explanation-card p {
+  color: #666;
+  margin-bottom: 1rem;
+  line-height: 1.6;
+}
+
+.explanation-card ul {
+  margin-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.explanation-card li {
+  color: #666;
+  margin-bottom: 0.5rem;
+  line-height: 1.5;
+}
+
 .dashboard-container {
   max-width: 1400px;
   margin: 0 auto;

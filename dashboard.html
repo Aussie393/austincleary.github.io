@@ -32,15 +32,26 @@
   <main>
     <section class="page-header">
       <div class="container">
-        <h1>Engine Maintenance Optimization Dashboard</h1>
-        <p>Interactive dashboard for optimizing engine maintenance parameters and visualizing maintenance plans.</p>
+        <h1>CFM56 Engine Maintenance Optimization Dashboard</h1>
+        <p>Interactive dashboard for optimizing CFM56 engine maintenance parameters and visualizing performance analytics.</p>
+        <div class="engine-specs">
+          <h3>Engine Specifications</h3>
+          <p><strong>Model:</strong> CFM56-7B24 (Boeing 737NG)</p>
+          <p><strong>Thrust:</strong> 24,000 lbf | <strong>Bypass Ratio:</strong> 5.1:1 | <strong>Compressor Stages:</strong> 9 HP + 1 LP</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="dashboard-content">
+      <div class="container">
+        <div id="dashboard-root"></div>
       </div>
     </section>
 
     <!-- Engineering Equations Section -->
     <section class="equations-section">
       <div class="container">
-        <h2>Engineering Equations Used</h2>
+        <h2>Engineering Equations Used for CFM56 Analysis</h2>
         <div class="equations-grid">
           <div class="equation-card">
             <h3>Maintenance Cost Model</h3>
@@ -108,12 +119,6 @@
             F<sub>life</sub> = Life factor (affects maintenance frequency)</p>
           </div>
         </div>
-      </div>
-    </section>
-
-    <section class="dashboard-content">
-      <div class="container">
-        <div id="dashboard-root"></div>
       </div>
     </section>
   </main>
@@ -403,28 +408,47 @@
         ];
       };
 
-      // Generate chart data using real engineering calculations
+      // Generate chart data using real engineering calculations for CFM56 engine
       const generateChartData = () => {
         const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
         const { operatingHours, ambientTemperature, loadFactor } = parameters;
         
-        // Seasonal temperature variations (Northern Hemisphere)
-        const seasonalTemps = [-5, 0, 5, 15, 25, 30, 35, 33, 28, 18, 8, 2]; // Monthly average temps
+        // Monthly calculations explained:
+        // 1. Seasonal temperature variations affect thermal stress on engine components
+        // 2. Operating hours vary monthly due to flight schedules and seasonal demand
+        // 3. Maintenance costs increase with thermal stress and operating hours
+        // 4. Engine efficiency decreases with higher thermal stress and load factors
+        
+        const seasonalTemps = [-5, 0, 5, 15, 25, 30, 35, 33, 28, 18, 8, 2]; // Monthly ambient temps (°C)
+        const seasonalHours = [0.85, 0.9, 0.95, 1.0, 1.05, 1.1, 1.15, 1.1, 1.0, 0.95, 0.9, 0.85]; // Monthly hour multipliers
         
         const costData = months.map((_, index) => {
           const monthlyTemp = seasonalTemps[index];
-          const tempDiff = Math.abs(monthlyTemp - 20);
+          const monthlyHourMultiplier = seasonalHours[index];
+          const actualMonthlyHours = operatingHours * monthlyHourMultiplier;
+          
+          // Calculate thermal stress impact on CFM56 components
+          const tempDiff = Math.abs(monthlyTemp - 20); // 20°C design reference
           const thermalStress = calculateThermalStress(tempDiff);
+          
+          // Load factor impact on engine life
           const lifeFactor = calculateLoadFactor(loadFactor);
-          const failureRate = calculateWeibullFailureRate(operatingHours * (1 + Math.sin(index * 0.5) * 0.1));
           
-          // Calculate monthly maintenance cost based on thermal stress and load factor
-          const baseCost = operatingHours * 150 * 0.3; // Base preventive cost
-          const thermalFactor = 1 + (thermalStress / (200e6)) * 2; // Thermal stress impact
-          const loadFactorImpact = 1 + (1 - lifeFactor) * 0.5; // Load factor impact
-          const seasonalFactor = 1 + Math.sin(index * 0.5) * 0.2; // Seasonal variation
+          // Weibull failure rate based on accumulated hours
+          const failureRate = calculateWeibullFailureRate(actualMonthlyHours);
           
-          return Math.round(baseCost * thermalFactor * loadFactorImpact * seasonalFactor);
+          // CFM56-specific maintenance cost calculation:
+          // - Base preventive maintenance cost per flight hour: $45
+          // - Thermal stress increases maintenance requirements
+          // - Higher load factors increase component wear
+          const baseCostPerHour = 45; // USD per flight hour for CFM56
+          const thermalFactor = 1 + (thermalStress / (200e6)) * 3; // Thermal stress impact
+          const loadFactorImpact = 1 + (1 - lifeFactor) * 0.8; // Load factor impact on wear
+          const failureCost = failureRate * 5000; // Additional cost from predicted failures
+          
+          const monthlyCost = actualMonthlyHours * baseCostPerHour * thermalFactor * loadFactorImpact + failureCost;
+          
+          return Math.round(monthlyCost);
         });
         
         const efficiencyData = months.map((_, index) => {
@@ -433,19 +457,26 @@
           const thermalStress = calculateThermalStress(tempDiff);
           const lifeFactor = calculateLoadFactor(loadFactor);
           
-          // Calculate efficiency based on thermal stress and load factor
-          const baseEfficiency = 90;
-          const thermalImpact = (thermalStress / (200e6)) * 10; // Thermal stress reduces efficiency
-          const loadImpact = (1 - lifeFactor) * 5; // Load factor impact
-          const seasonalImpact = Math.sin(index * 0.3) * 3; // Seasonal variation
+          // CFM56 efficiency calculation:
+          // - Base efficiency at ISA conditions: 92%
+          // - Thermal stress reduces compressor efficiency
+          // - Load factor affects fan and turbine efficiency
+          // - Seasonal variations in air density affect performance
+          const baseEfficiency = 92; // CFM56-7B24 base efficiency
+          const thermalImpact = (thermalStress / (200e6)) * 15; // Thermal stress reduces efficiency
+          const loadImpact = (1 - lifeFactor) * 8; // Load factor impact
+          const seasonalDensityImpact = Math.sin(index * 0.5) * 2; // Air density seasonal variation
           
-          return Math.round(baseEfficiency - thermalImpact - loadImpact + seasonalImpact);
+          const efficiency = baseEfficiency - thermalImpact - loadImpact + seasonalDensityImpact;
+          
+          return Math.round(Math.max(75, efficiency)); // Minimum 75% efficiency
         });
 
         return {
           labels: months,
           cost: costData,
-          efficiency: efficiencyData
+          efficiency: efficiencyData,
+          explanation: "Monthly data shows seasonal variations in maintenance costs and engine efficiency based on ambient temperature, operating hours, and load factors affecting CFM56 engine performance."
         };
       };
 
@@ -536,45 +567,27 @@
             </div>
           </div>
 
-          {/* Maintenance Plans */}
-          <div className="plans-section">
-            <h2>Recommended Maintenance Plans</h2>
-            <div className="plans-grid">
-              {maintenancePlans.map(plan => (
-                <MaintenancePlanCard
-                  key={plan.id}
-                  plan={plan}
-                  isRecommended={plan.id === recommendedPlan.id}
-                  onClick={handlePlanSelection}
-                />
-              ))}
+          {/* Chart Explanation */}
+          <div className="chart-explanation">
+            <h2>Performance Analytics Explanation</h2>
+            <div className="explanation-card">
+              <h3>Monthly Data Calculation</h3>
+              <p><strong>Maintenance Cost:</strong> Based on $45/flight hour base cost for CFM56-7B24, adjusted for:</p>
+              <ul>
+                <li>Seasonal temperature variations (-5°C to 35°C)</li>
+                <li>Monthly operating hour variations (85% to 115% of input)</li>
+                <li>Thermal stress impact on engine components</li>
+                <li>Load factor effects on component wear</li>
+                <li>Weibull failure rate predictions</li>
+              </ul>
+              <p><strong>Engine Efficiency:</strong> Based on 92% base efficiency, reduced by:</p>
+              <ul>
+                <li>Thermal stress effects on compressor performance</li>
+                <li>Load factor impact on fan and turbine efficiency</li>
+                <li>Seasonal air density variations</li>
+              </ul>
             </div>
           </div>
-
-          {/* Selected Plan Details */}
-          {selectedPlan && (
-            <div className="selected-plan-section">
-              <h2>Selected Plan Details</h2>
-              <div className="selected-plan-card">
-                <h3>{selectedPlan.name}</h3>
-                <p>{selectedPlan.description}</p>
-                <div className="plan-metrics">
-                  <div className="metric">
-                    <span className="metric-label">Estimated Annual Cost:</span>
-                    <span className="metric-value">${selectedPlan.cost.toLocaleString()}</span>
-                  </div>
-                  <div className="metric">
-                    <span className="metric-label">Expected Efficiency:</span>
-                    <span className="metric-value">{selectedPlan.efficiency}%</span>
-                  </div>
-                  <div className="metric">
-                    <span className="metric-label">Maintenance Frequency:</span>
-                    <span className="metric-value">{selectedPlan.frequency}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       );
     };
