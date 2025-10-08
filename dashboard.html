@@ -37,6 +37,80 @@
       </div>
     </section>
 
+    <!-- Engineering Equations Section -->
+    <section class="equations-section">
+      <div class="container">
+        <h2>Engineering Equations Used</h2>
+        <div class="equations-grid">
+          <div class="equation-card">
+            <h3>Maintenance Cost Model</h3>
+            <div class="equation">
+              <p><strong>C<sub>total</sub> = C<sub>preventive</sub> + C<sub>corrective</sub> + C<sub>opportunity</sub></strong></p>
+            </div>
+            <p>Where:<br>
+            C<sub>preventive</sub> = Preventive maintenance cost<br>
+            C<sub>corrective</sub> = Corrective maintenance cost<br>
+            C<sub>opportunity</sub> = Opportunity cost due to downtime</p>
+          </div>
+
+          <div class="equation-card">
+            <h3>Failure Rate (Weibull Distribution)</h3>
+            <div class="equation">
+              <p><strong>λ(t) = (β/η) × (t/η)<sup>β-1</sup></strong></p>
+            </div>
+            <p>Where:<br>
+            β = Shape parameter (β > 1 for wear-out failures)<br>
+            η = Scale parameter (characteristic life)<br>
+            t = Operating time</p>
+          </div>
+
+          <div class="equation-card">
+            <h3>Availability Calculation</h3>
+            <div class="equation">
+              <p><strong>A = MTBF / (MTBF + MTTR)</strong></p>
+            </div>
+            <p>Where:<br>
+            MTBF = Mean Time Between Failures<br>
+            MTTR = Mean Time To Repair<br>
+            A = System availability (0-1)</p>
+          </div>
+
+          <div class="equation-card">
+            <h3>Optimal Maintenance Interval</h3>
+            <div class="equation">
+              <p><strong>T<sub>opt</sub> = η × [(C<sub>f</sub>/C<sub>p</sub>) × (β-1)]<sup>1/β</sup></strong></p>
+            </div>
+            <p>Where:<br>
+            C<sub>f</sub> = Cost of failure<br>
+            C<sub>p</sub> = Cost of preventive maintenance<br>
+            T<sub>opt</sub> = Optimal maintenance interval</p>
+          </div>
+
+          <div class="equation-card">
+            <h3>Thermal Stress Factor</h3>
+            <div class="equation">
+              <p><strong>σ<sub>thermal</sub> = α × E × ΔT</strong></p>
+            </div>
+            <p>Where:<br>
+            α = Coefficient of thermal expansion<br>
+            E = Young's modulus<br>
+            ΔT = Temperature difference from ambient</p>
+          </div>
+
+          <div class="equation-card">
+            <h3>Load Factor Impact</h3>
+            <div class="equation">
+              <p><strong>F<sub>life</sub> = (L<sub>rated</sub>/L<sub>actual</sub>)<sup>3</sup></strong></p>
+            </div>
+            <p>Where:<br>
+            L<sub>rated</sub> = Rated load<br>
+            L<sub>actual</sub> = Actual operating load<br>
+            F<sub>life</sub> = Life factor (affects maintenance frequency)</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <section class="dashboard-content">
       <div class="container">
         <div id="dashboard-root"></div>
@@ -207,67 +281,166 @@
       const [selectedPlan, setSelectedPlan] = useState(null);
       const [chartData, setChartData] = useState(null);
 
-      // Generate maintenance plans based on parameters
+      // Engineering calculations using real equations
+      const calculateWeibullFailureRate = (t, beta = 2.5, eta = 5000) => {
+        // λ(t) = (β/η) × (t/η)^(β-1)
+        return (beta / eta) * Math.pow(t / eta, beta - 1);
+      };
+
+      const calculateThermalStress = (tempDiff, alpha = 12e-6, E = 200e9) => {
+        // σ_thermal = α × E × ΔT
+        return alpha * E * tempDiff;
+      };
+
+      const calculateLoadFactor = (actualLoad, ratedLoad = 100) => {
+        // F_life = (L_rated/L_actual)^3
+        return Math.pow(ratedLoad / actualLoad, 3);
+      };
+
+      const calculateOptimalInterval = (cf, cp, beta = 2.5, eta = 5000) => {
+        // T_opt = η × [(C_f/C_p) × (β-1)]^(1/β)
+        return eta * Math.pow((cf / cp) * (beta - 1), 1 / beta);
+      };
+
+      const calculateAvailability = (mtbf, mttr) => {
+        // A = MTBF / (MTBF + MTTR)
+        return mtbf / (mtbf + mttr);
+      };
+
+      // Generate maintenance plans based on real engineering parameters
       const generateMaintenancePlans = () => {
         const { operatingHours, ambientTemperature, loadFactor, maintenanceBudget, riskTolerance } = parameters;
         
-        const baseCost = operatingHours * 0.5;
-        const tempFactor = ambientTemperature > 30 ? 1.2 : 1.0;
-        const loadFactorMultiplier = loadFactor / 100;
+        // Calculate failure rate using Weibull distribution
+        const failureRate = calculateWeibullFailureRate(operatingHours);
+        
+        // Calculate thermal stress factor
+        const tempDiff = Math.abs(ambientTemperature - 20); // 20°C reference
+        const thermalStress = calculateThermalStress(tempDiff);
+        
+        // Calculate load factor impact
+        const lifeFactor = calculateLoadFactor(loadFactor);
+        
+        // Calculate MTBF and MTTR based on parameters
+        const baseMTBF = 8000; // hours
+        const adjustedMTBF = baseMTBF * lifeFactor * (1 - thermalStress / (200e6)); // Thermal stress impact
+        const baseMTTR = 24; // hours
+        const adjustedMTTR = baseMTTR * (1 + failureRate * 10);
+        
+        // Calculate availability
+        const availability = calculateAvailability(adjustedMTBF, adjustedMTTR);
+        
+        // Cost calculations based on real maintenance cost model
+        const baseHourlyRate = 150; // $/hour
+        const preventiveCostPerHour = baseHourlyRate * 0.3;
+        const correctiveCostPerHour = baseHourlyRate * 1.5;
+        const opportunityCostPerHour = 500; // $/hour downtime cost
+        
+        // Optimal maintenance interval calculation
+        const cf = correctiveCostPerHour * adjustedMTTR + opportunityCostPerHour * adjustedMTTR;
+        const cp = preventiveCostPerHour * 8; // 8 hours preventive maintenance
+        const optimalInterval = calculateOptimalInterval(cf, cp);
+        
+        // Calculate maintenance costs using real engineering models
+        const preventiveCost = preventiveCostPerHour * 8 * (operatingHours / 500); // 8 hours every 500 hours
+        const correctiveCost = correctiveCostPerHour * adjustedMTTR * failureRate * operatingHours;
+        const opportunityCost = opportunityCostPerHour * adjustedMTTR * failureRate * operatingHours;
+        
+        const totalPreventiveCost = preventiveCost;
+        const totalPredictiveCost = preventiveCost * 1.3 + (correctiveCost * 0.7); // 30% more preventive, 30% less corrective
+        const totalReactiveCost = correctiveCost + opportunityCost; // No preventive cost
+        const totalConditionBasedCost = preventiveCost * 1.5 + (correctiveCost * 0.5); // 50% more preventive, 50% less corrective
         
         return [
           {
             id: 1,
             name: 'Preventive Maintenance',
-            frequency: 'Every 500 hours',
-            cost: Math.round(baseCost * 0.8 * tempFactor * loadFactorMultiplier),
-            efficiency: Math.min(95, 85 + (riskTolerance / 10)),
+            frequency: `Every ${Math.round(optimalInterval)} hours`,
+            cost: Math.round(totalPreventiveCost),
+            efficiency: Math.round(availability * 100),
             riskLevel: 'Low',
-            description: 'Regular scheduled maintenance to prevent failures and maintain optimal performance.'
+            description: `Regular scheduled maintenance every ${Math.round(optimalInterval)} hours based on optimal interval calculation.`,
+            mtbf: Math.round(adjustedMTBF),
+            mttr: Math.round(adjustedMTTR),
+            availability: Math.round(availability * 100)
           },
           {
             id: 2,
             name: 'Predictive Maintenance',
-            frequency: 'Based on condition',
-            cost: Math.round(baseCost * 1.2 * tempFactor * loadFactorMultiplier),
-            efficiency: Math.min(98, 90 + (riskTolerance / 15)),
+            frequency: 'Based on condition monitoring',
+            cost: Math.round(totalPredictiveCost),
+            efficiency: Math.round(availability * 105), // 5% improvement
             riskLevel: 'Medium',
-            description: 'Data-driven maintenance using sensors and analytics to predict when maintenance is needed.'
+            description: 'Data-driven maintenance using Weibull failure analysis and condition monitoring.',
+            mtbf: Math.round(adjustedMTBF * 1.1),
+            mttr: Math.round(adjustedMTTR * 0.8),
+            availability: Math.round(availability * 105)
           },
           {
             id: 3,
             name: 'Reactive Maintenance',
             frequency: 'When failure occurs',
-            cost: Math.round(baseCost * 0.6 * tempFactor * loadFactorMultiplier),
-            efficiency: Math.max(60, 70 - (riskTolerance / 20)),
+            cost: Math.round(totalReactiveCost),
+            efficiency: Math.round(availability * 85), // 15% reduction
             riskLevel: 'High',
-            description: 'Maintenance performed only after equipment failure, lowest upfront cost but higher risk.'
+            description: 'Maintenance performed only after equipment failure. High downtime costs.',
+            mtbf: Math.round(adjustedMTBF * 0.9),
+            mttr: Math.round(adjustedMTTR * 1.2),
+            availability: Math.round(availability * 85)
           },
           {
             id: 4,
             name: 'Condition-Based Maintenance',
             frequency: 'Real-time monitoring',
-            cost: Math.round(baseCost * 1.5 * tempFactor * loadFactorMultiplier),
-            efficiency: Math.min(99, 92 + (riskTolerance / 12)),
+            cost: Math.round(totalConditionBasedCost),
+            efficiency: Math.round(availability * 108), // 8% improvement
             riskLevel: 'Low',
-            description: 'Advanced monitoring with continuous assessment of equipment condition and performance.'
+            description: 'Advanced monitoring with continuous thermal stress and load factor analysis.',
+            mtbf: Math.round(adjustedMTBF * 1.2),
+            mttr: Math.round(adjustedMTTR * 0.7),
+            availability: Math.round(availability * 108)
           }
         ];
       };
 
-      // Generate chart data
+      // Generate chart data using real engineering calculations
       const generateChartData = () => {
         const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        const { operatingHours, maintenanceBudget } = parameters;
+        const { operatingHours, ambientTemperature, loadFactor } = parameters;
         
-        const baseCost = operatingHours * 0.5;
-        const costData = months.map((_, index) => 
-          Math.round(baseCost * (0.8 + 0.4 * Math.sin(index * 0.5)) * (1 + Math.random() * 0.2))
-        );
+        // Seasonal temperature variations (Northern Hemisphere)
+        const seasonalTemps = [-5, 0, 5, 15, 25, 30, 35, 33, 28, 18, 8, 2]; // Monthly average temps
         
-        const efficiencyData = months.map((_, index) => 
-          Math.round(85 + 10 * Math.sin(index * 0.3) + Math.random() * 5)
-        );
+        const costData = months.map((_, index) => {
+          const monthlyTemp = seasonalTemps[index];
+          const tempDiff = Math.abs(monthlyTemp - 20);
+          const thermalStress = calculateThermalStress(tempDiff);
+          const lifeFactor = calculateLoadFactor(loadFactor);
+          const failureRate = calculateWeibullFailureRate(operatingHours * (1 + Math.sin(index * 0.5) * 0.1));
+          
+          // Calculate monthly maintenance cost based on thermal stress and load factor
+          const baseCost = operatingHours * 150 * 0.3; // Base preventive cost
+          const thermalFactor = 1 + (thermalStress / (200e6)) * 2; // Thermal stress impact
+          const loadFactorImpact = 1 + (1 - lifeFactor) * 0.5; // Load factor impact
+          const seasonalFactor = 1 + Math.sin(index * 0.5) * 0.2; // Seasonal variation
+          
+          return Math.round(baseCost * thermalFactor * loadFactorImpact * seasonalFactor);
+        });
+        
+        const efficiencyData = months.map((_, index) => {
+          const monthlyTemp = seasonalTemps[index];
+          const tempDiff = Math.abs(monthlyTemp - 20);
+          const thermalStress = calculateThermalStress(tempDiff);
+          const lifeFactor = calculateLoadFactor(loadFactor);
+          
+          // Calculate efficiency based on thermal stress and load factor
+          const baseEfficiency = 90;
+          const thermalImpact = (thermalStress / (200e6)) * 10; // Thermal stress reduces efficiency
+          const loadImpact = (1 - lifeFactor) * 5; // Load factor impact
+          const seasonalImpact = Math.sin(index * 0.3) * 3; // Seasonal variation
+          
+          return Math.round(baseEfficiency - thermalImpact - loadImpact + seasonalImpact);
+        });
 
         return {
           labels: months,
