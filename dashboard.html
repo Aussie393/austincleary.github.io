@@ -32,8 +32,8 @@
   <main>
     <section class="page-header">
       <div class="container">
-        <h1>CFM56 Engine Maintenance Optimization Dashboard</h1>
-        <p>Interactive dashboard for optimizing CFM56 engine maintenance parameters and visualizing performance analytics.</p>
+        <h1>CFM56 Engine Maintenance Optimisation Dashboard</h1>
+        <p>Interactive dashboard for optimising CFM56 engine maintenance parameters and visualising performance analytics.</p>
         <div class="engine-specs">
           <h3>Engine Specifications</h3>
           <p><strong>Model:</strong> CFM56-7B24 (Boeing 737NG)</p>
@@ -188,7 +188,7 @@
     );
 
     // Chart Component
-    const OptimizationChart = ({ data }) => {
+    const OptimisationChart = ({ data }) => {
       const canvasRef = React.useRef(null);
       const chartRef = React.useRef(null);
 
@@ -508,7 +508,7 @@
           <div className="dashboard-grid">
             {/* Parameter Controls */}
             <div className="parameters-panel">
-              <h2>Optimization Parameters</h2>
+              <h2>Optimisation Parameters</h2>
               <div className="parameters-grid">
                 <ParameterControl
                   label="Operating Hours (per month)"
@@ -562,7 +562,7 @@
             <div className="chart-panel">
               <h2>Performance Analytics</h2>
               <div className="chart-container">
-                {chartData && <OptimizationChart data={chartData} />}
+                {chartData && <OptimisationChart data={chartData} />}
               </div>
             </div>
           </div>
