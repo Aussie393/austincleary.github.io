@@ -120,6 +120,9 @@ func Dijkstra(g Graph, src, dst string) DijkstraResult {
 		visited[u] = true
 		visitedOrder = append(visitedOrder, u)
 
+		// Real-time decision printing
+		fmt.Printf(">>> DECISION: Visiting node %s with distance %d\n", u, dist[u])
+
 		stepNum++
 		snapshot := copyDistMap(dist)
 		steps = append(steps, DijkstraStep{
@@ -328,9 +331,18 @@ func writeSVG(filename string, g Graph, pos map[string]Point, shortestPath []str
 				cls = "edge path"
 			}
 
-			// edge line
-			write(fmt.Sprintf(`<line x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f" class="%s"/>`+"\n",
-				start.X, start.Y, end.X, end.Y, cls))
+			// Use curved path (quadratic Bezier) for edges
+			// Control point is perpendicular to the midpoint
+			midX := (start.X + end.X) / 2
+			midY := (start.Y + end.Y) / 2
+			// Perpendicular offset for curve
+			offset := 30.0
+			cpX := midX - uy*offset
+			cpY := midY + ux*offset
+
+			// edge curved path
+			write(fmt.Sprintf(`<path d="M %.1f %.1f Q %.1f %.1f %.1f %.1f" class="%s" fill="none" stroke-linecap="round"/>`+"\n",
+				start.X, start.Y, cpX, cpY, end.X, end.Y, cls))
 
 			// arrowhead at end
 			base := Point{X: end.X - ux*arrowLen, Y: end.Y - uy*arrowLen}
@@ -338,15 +350,15 @@ func writeSVG(filename string, g Graph, pos map[string]Point, shortestPath []str
 			p1 := end
 			p2 := Point{X: base.X + nx*(arrowWidth/2), Y: base.Y + ny*(arrowWidth/2)}
 			p3 := Point{X: base.X - nx*(arrowWidth/2), Y: base.Y - ny*(arrowWidth/2)}
+			arrowColor := map[bool]string{true: "#d33", false: "#888"}[cls == "edge path"]
 			write(fmt.Sprintf(`<polygon points="%.1f,%.1f %.1f,%.1f %.1f,%.1f" fill="%s" />`+"\n",
-				p1.X, p1.Y, p2.X, p2.Y, p3.X, p3.Y,
-				map[bool]string{true: "#d33", false: "#888"}[cls == "edge path"]))
+				p1.X, p1.Y, p2.X, p2.Y, p3.X, p3.Y, arrowColor))
 
-			// weight label at midpoint
-			mx := (start.X + end.X) / 2
-			my := (start.Y + end.Y) / 2
+			// weight label positioned along the curve
+			labelX := midX - uy*offset*0.6
+			labelY := midY + ux*offset*0.6
 			write(fmt.Sprintf(`<text x="%.1f" y="%.1f" text-anchor="middle" class="wlabel" dy="-4">%d</text>`+"\n",
-				mx, my, e.Weight))
+				labelX, labelY, e.Weight))
 		}
 	}
 
